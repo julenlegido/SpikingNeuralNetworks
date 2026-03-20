@@ -1,0 +1,13 @@
+import torch
+
+def get_device():
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    elif torch.cuda.is_available():
+        return torch.device("cuda")
+    else:
+        return torch.device("cpu")
+    
+if __name__ == "__main__":
+    device = get_device()
+    print(f"Using device: {device}")

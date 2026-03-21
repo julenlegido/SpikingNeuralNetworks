@@ -58,6 +58,7 @@ def train_snn(num_epochs=5, num_steps=100, batch_size=64, lr=1e-3):
         #tracker.epoch_end()
 
     #tracker.stop()
+    #torch.save(model.state_dict(), "results/checkpoints/snn_model_100_steps.pth")
     return model
 
 

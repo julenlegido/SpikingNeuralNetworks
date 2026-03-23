@@ -6,17 +6,19 @@ from src.models.snn_mlp import SNN_MLP
 from src.utils.device import get_device
 from src.evaluation.spike_metrics import compute_spike_stats
 
+import json
+
 
 def analyze_spikes(num_steps=100):
     device = get_device()
 
-    train_loader, _ = get_mnist_dataloaders(batch_size=64)
+    test_loader, _ = get_mnist_dataloaders(batch_size=64)
 
     model = SNN_MLP().to(device)
 
     # load trained model
     model.load_state_dict(torch.load(
-        f"results/checkpoints/snn_model_{num_steps}_steps.pth",
+        f"results/checkpoints/snn_model_{num_steps}.pth",
         map_location=device
     ))
 
@@ -26,7 +28,7 @@ def analyze_spikes(num_steps=100):
     total_elements = 0
 
     with torch.no_grad():
-        for images, _ in tqdm(train_loader):
+        for images, _ in tqdm(test_loader):
 
             images = images.to(device)
 
@@ -39,6 +41,15 @@ def analyze_spikes(num_steps=100):
 
     firing_rate = total_spikes / total_elements
     sparsity = 1 - firing_rate
+
+    results = {
+            "num_steps":num_steps,
+            "total_spikes":total_spikes,
+            "firing_rate":firing_rate,
+            "sparsity":sparsity
+    }
+    with open(f"results/logs/spike_results_{num_steps}_steps.json", "w") as f:
+        json.dump(results, f)
 
     print(f"\nResults for {num_steps} timesteps:")
     print(f"Total spikes: {total_spikes}")

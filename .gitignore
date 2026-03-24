@@ -31,8 +31,8 @@ data/processed/
 # Results (large outputs)
 # -----------------------------
 results/checkpoints/
-results/logs/
-results/figures/
+#results/logs/
+#results/figures/
 
 # -----------------------------
 # Model files

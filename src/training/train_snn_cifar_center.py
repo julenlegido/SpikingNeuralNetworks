@@ -7,25 +7,25 @@ import json
 
 from snntorch import spikegen
 
-from src.data.mnist import get_mnist_dataloaders
-from src.models.snn_mlp_rate import SNN_MLP_Rate
+from src.data.cifar10 import get_cifar10_dataloaders
+from src.models.snn_cnn import SNN_CNN
 from src.utils.device import get_device
 from src.utils.center_weight_mask import create_center_weight_mask
 
 
-def train_snn_center(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike_prob_scale=0.5):
+def train_snn_cifar_center(num_epochs=5, num_steps=10, batch_size=64, lr=1e-3):
     device = get_device()
 
-    train_loader, test_loader = get_mnist_dataloaders(batch_size=batch_size)
+    train_loader, test_loader = get_cifar10_dataloaders(batch_size=batch_size)
 
-    model = SNN_MLP_Rate().to(device)
+    model = SNN_CNN().to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    #create mask
-    mask = create_center_weight_mask().to(device)
-    mask = mask.unsqueeze(0).unsqueeze(0)  # shape [1,1,28,28]
+    # CREATE MASK FOR CIFAR (32x32)
+    mask = create_center_weight_mask(size=32).to(device)
+    mask = mask.unsqueeze(0).unsqueeze(0)  # [1,1,32,32]
 
     train_losses = []
     test_accuracies = []
@@ -42,13 +42,10 @@ def train_snn_center(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike_p
             images = images.to(device)
             labels = labels.to(device)
 
-            # APPLY CENTER WEIGHTING
+            # APPLY CENTER WEIGHTING (broadcasts to 3 channels)
             weighted_images = images * mask
 
-            # apply spike probability scaling
-            encoded_images = torch.clamp(weighted_images * spike_prob_scale, 0, 1)
-
-            spike_input = spikegen.rate(encoded_images, num_steps=num_steps)
+            spike_input = spikegen.rate(weighted_images, num_steps=num_steps)
 
             optimizer.zero_grad()
 
@@ -68,40 +65,30 @@ def train_snn_center(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike_p
 
         print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
 
-        test_accuracy = evaluate_snn_center(
-            model=model,
-            data_loader=test_loader,
-            device=device,
-            num_steps=num_steps,
-            spike_prob_scale=spike_prob_scale,
-            mask=mask
+        test_accuracy = evaluate_snn_cifar_center(
+            model, test_loader, device, num_steps, mask
         )
 
         test_accuracies.append(test_accuracy)
+
         print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-    torch.save(
-        model.state_dict(),
-        f"results/checkpoints/snn_center_model_scale{spike_prob_scale}.pth"
-    )
+    torch.save(model.state_dict(), "results/checkpoints/snn_cifar_center.pth")
 
     results = {
         "loss": train_losses,
         "accuracy": test_accuracies,
         "time": epoch_times,
-        "spike_prob_scale": spike_prob_scale
+        "num_steps": num_steps
     }
 
-    with open(
-        f"results/logs/snn_center_results_scale{spike_prob_scale}.json",
-        "w"
-    ) as f:
+    with open("results/logs/snn_cifar_center_results.json", "w") as f:
         json.dump(results, f)
 
     return model
 
 
-def evaluate_snn_center(model, data_loader, device, num_steps, spike_prob_scale, mask):
+def evaluate_snn_cifar_center(model, data_loader, device, num_steps, mask):
     model.eval()
     correct = 0
     total = 0
@@ -112,9 +99,7 @@ def evaluate_snn_center(model, data_loader, device, num_steps, spike_prob_scale,
             labels = labels.to(device)
 
             weighted_images = images * mask
-            encoded_images = torch.clamp(weighted_images * spike_prob_scale, 0, 1)
-
-            spike_input = spikegen.rate(encoded_images, num_steps=num_steps)
+            spike_input = spikegen.rate(weighted_images, num_steps=num_steps)
 
             spk_rec = model(spike_input)
             spk_sum = spk_rec.sum(dim=0)
@@ -128,4 +113,4 @@ def evaluate_snn_center(model, data_loader, device, num_steps, spike_prob_scale,
 
 
 if __name__ == "__main__":
-    train_snn_center()
+    train_snn_cifar_center()

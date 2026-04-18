@@ -16,7 +16,7 @@ def analyze_spikes_center(num_steps=25, spike_prob_scale=0.5):
 
     model = SNN_MLP_Rate().to(device)
 
-    # 🔥 LOAD TRAINED MODEL
+    # LOAD TRAINED MODEL
     model.load_state_dict(torch.load(
         f"results/checkpoints/snn_center_model_scale{spike_prob_scale}.pth",
         map_location=device
@@ -24,7 +24,7 @@ def analyze_spikes_center(num_steps=25, spike_prob_scale=0.5):
 
     model.eval()
 
-    # 🔥 CREATE SAME MASK USED IN TRAINING
+    # CREATE SAME MASK USED IN TRAINING
     mask = create_center_weight_mask().to(device)
     mask = mask.unsqueeze(0).unsqueeze(0)  # [1,1,28,28]
 
@@ -36,7 +36,7 @@ def analyze_spikes_center(num_steps=25, spike_prob_scale=0.5):
 
             images = images.to(device)
 
-            # 🔥 APPLY CENTER WEIGHTING
+            # APPLY CENTER WEIGHTING
             weighted_images = images * mask
 
             # apply spike probability scaling

@@ -37,7 +37,7 @@ def train_snn_cifar(num_epochs=5, num_steps=10, batch_size=64, lr=1e-3):
             images = images.to(device)
             labels = labels.to(device)
 
-            # 🔥 RATE ENCODING
+            # RATE ENCODING
             spike_input = spikegen.rate(images, num_steps=num_steps)
 
             optimizer.zero_grad()

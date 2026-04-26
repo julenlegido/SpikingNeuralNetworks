@@ -9,7 +9,7 @@ from src.utils.device import get_device
 from src.utils.center_weight_mask import create_center_weight_mask
 
 
-def analyze_spikes_center(num_steps=25, spike_prob_scale=0.5):
+def analyze_spikes_center(num_steps=25, spike_prob_scale=1.5):
     device = get_device()
 
     _, test_loader = get_mnist_dataloaders(batch_size=64)
@@ -63,7 +63,7 @@ def analyze_spikes_center(num_steps=25, spike_prob_scale=0.5):
 
     # 💾 SAVE RESULTS
     with open(
-        f"results/logs/spike_center_results_scale{spike_prob_scale}.json",
+        f"results/logs/spike_center_results_steps{num_steps}_scale{spike_prob_scale}.json",
         "w"
     ) as f:
         json.dump(results, f)

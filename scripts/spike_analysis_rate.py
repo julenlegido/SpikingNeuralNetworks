@@ -8,7 +8,7 @@ from src.models.snn_mlp_rate import SNN_MLP_Rate
 from src.utils.device import get_device
 
 
-def analyze_spikes_rate(num_steps=25, spike_prob_scale=1.5):
+def analyze_spikes_rate(num_steps=25, spike_prob_scale=0.9):
     device = get_device()
 
     _, test_loader = get_mnist_dataloaders(batch_size=64)

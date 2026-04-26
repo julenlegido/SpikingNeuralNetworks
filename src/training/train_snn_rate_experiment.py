@@ -12,7 +12,7 @@ from src.models.snn_mlp_rate import SNN_MLP_Rate
 from src.utils.device import get_device
 
 
-def train_snn_rate(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike_prob_scale=1.5):
+def train_snn_rate(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike_prob_scale=0.9):
     device = get_device()
 
     train_loader, test_loader = get_mnist_dataloaders(batch_size=batch_size)

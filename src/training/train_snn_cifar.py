@@ -12,14 +12,18 @@ from src.models.snn_cnn import SNN_CNN
 from src.utils.device import get_device
 
 
-def train_snn_cifar(num_epochs=5, num_steps=10, batch_size=64, lr=1e-3):
+def train_snn_cifar(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, use_mse=False):
     device = get_device()
 
     train_loader, test_loader = get_cifar10_dataloaders(batch_size=batch_size)
 
     model = SNN_CNN().to(device)
 
-    criterion = nn.CrossEntropyLoss()
+    if use_mse:
+        criterion = nn.MSELoss()
+    else:
+        criterion = nn.CrossEntropyLoss()
+
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     train_losses = []
@@ -37,7 +41,6 @@ def train_snn_cifar(num_epochs=5, num_steps=10, batch_size=64, lr=1e-3):
             images = images.to(device)
             labels = labels.to(device)
 
-            # RATE ENCODING
             spike_input = spikegen.rate(images, num_steps=num_steps)
 
             optimizer.zero_grad()
@@ -45,7 +48,17 @@ def train_snn_cifar(num_epochs=5, num_steps=10, batch_size=64, lr=1e-3):
             spk_rec = model(spike_input)
             spk_sum = spk_rec.sum(dim=0)
 
-            loss = criterion(spk_sum, labels)
+            if use_mse:
+                # normalize spike output
+                spk_sum = spk_sum / num_steps
+
+                targets = torch.zeros(spk_sum.size(0), 10).to(device)
+                targets.scatter_(1, labels.unsqueeze(1), 1)
+
+                loss = criterion(spk_sum, targets)
+            else:
+                loss = criterion(spk_sum, labels)
+
             loss.backward()
             optimizer.step()
 
@@ -69,16 +82,17 @@ def train_snn_cifar(num_epochs=5, num_steps=10, batch_size=64, lr=1e-3):
 
         print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-    torch.save(model.state_dict(), "results/checkpoints/snn_cifar.pth")
+    torch.save(model.state_dict(), "results/checkpoints/snn_cifar_norm_CE_ts25.pth")
 
     results = {
         "loss": train_losses,
         "accuracy": test_accuracies,
         "time": epoch_times,
-        "num_steps": num_steps
+        "num_steps": num_steps,
+        "use_mse": use_mse
     }
 
-    with open("results/logs/snn_cifar_results.json", "w") as f:
+    with open("results/logs/snn_cifar_norm_results_CE_ts25.json", "w") as f:
         json.dump(results, f)
 
     return model
@@ -108,4 +122,4 @@ def evaluate_snn_cifar(model, data_loader, device, num_steps):
 
 
 if __name__ == "__main__":
-    train_snn_cifar()
+    train_snn_cifar(use_mse=False)  # change to True for MSE

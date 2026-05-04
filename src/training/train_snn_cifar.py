@@ -8,8 +8,9 @@ import json
 from snntorch import spikegen
 
 from src.data.cifar10 import get_cifar10_dataloaders
-from src.models.snn_cnn_norm import SNN_CNN
+from src.models.snn_norm_kaiming import SNN_CNN
 from src.utils.device import get_device
+from src.utils.cifar_gradient_encoding import gradient_rate_encoding
 
 
 def train_snn_cifar(num_epochs=5, num_steps=15, batch_size=64, lr=1e-3, use_mse=True):
@@ -41,7 +42,8 @@ def train_snn_cifar(num_epochs=5, num_steps=15, batch_size=64, lr=1e-3, use_mse=
             images = images.to(device)
             labels = labels.to(device)
 
-            spike_input = spikegen.rate(images, num_steps=num_steps)
+            #spike_input = spikegen.rate(images, num_steps=num_steps)
+            spike_input = gradient_rate_encoding(images, num_steps=num_steps, scale=0.5)
 
             optimizer.zero_grad()
 
@@ -82,7 +84,7 @@ def train_snn_cifar(num_epochs=5, num_steps=15, batch_size=64, lr=1e-3, use_mse=
 
         print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-    torch.save(model.state_dict(), "results/checkpoints/snn_cifar_norm_MSE_ts15.pth")
+    torch.save(model.state_dict(), "results/checkpoints/snn_cifar_norm_MSE_ts15_gradientEnc0.5.pth")
 
     results = {
         "loss": train_losses,
@@ -92,7 +94,7 @@ def train_snn_cifar(num_epochs=5, num_steps=15, batch_size=64, lr=1e-3, use_mse=
         "use_mse": use_mse
     }
 
-    with open("results/logs/snn_cifar_norm_results_MSE_ts15.json", "w") as f:
+    with open("results/logs/snn_cifar_norm_results_MSE_ts15_gradientEnc0.5.json", "w") as f:
         json.dump(results, f)
 
     return model

@@ -13,7 +13,7 @@ from src.utils.device import get_device
 #from src.utils.cifar_gradient_encoding import gradient_rate_encoding
 
 
-def train_snn_cifar(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, use_mse=False):
+def train_snn_cifar(num_epochs=5, num_steps=5, batch_size=64, lr=1e-3, use_mse=True):
     device = get_device()
 
     train_loader, test_loader = get_cifar10_dataloaders(batch_size=batch_size)
@@ -84,7 +84,7 @@ def train_snn_cifar(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, use_mse=
 
         print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-    torch.save(model.state_dict(), "results/checkpoints/snn_cifar_results_CE_ts25.pth")
+    torch.save(model.state_dict(), "results/checkpoints/snn_cifar_results_MSE_ts5.pth")
 
     results = {
         "loss": train_losses,
@@ -94,7 +94,7 @@ def train_snn_cifar(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, use_mse=
         "use_mse": use_mse
     }
 
-    with open("results/logs/snn_cifar_results_CE_ts25.json", "w") as f:
+    with open("results/logs/snn_cifar_results_MSE_ts5.json", "w") as f:
         json.dump(results, f)
 
     return model
@@ -124,4 +124,4 @@ def evaluate_snn_cifar(model, data_loader, device, num_steps):
 
 
 if __name__ == "__main__":
-    train_snn_cifar(use_mse=False)  # change to True for MSE
+    train_snn_cifar(use_mse=True)  # change to True for MSE

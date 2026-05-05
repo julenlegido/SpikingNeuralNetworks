@@ -13,7 +13,7 @@ from src.utils.device import get_device
 from src.utils.gradient_encoding import compute_gradient_map, normalize_gradient
 
 
-def train_snn_gradient(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike_prob_scale=0.5):
+def train_snn_gradient(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike_prob_scale=0.6):
     device = get_device()
 
     train_loader, test_loader = get_mnist_dataloaders(batch_size=batch_size)
@@ -73,7 +73,7 @@ def train_snn_gradient(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike
 
         print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-    torch.save(model.state_dict(), "results/checkpoints/snn_gradient.pth")
+    torch.save(model.state_dict(), "results/checkpoints/snn_gradient_scale0.6_25steps.pth")
 
     results = {
         "loss": train_losses,
@@ -82,7 +82,7 @@ def train_snn_gradient(num_epochs=5, num_steps=25, batch_size=64, lr=1e-3, spike
         "spike_prob_scale": spike_prob_scale
     }
 
-    with open(f"results/logs/snn_gradient_results_prob{spike_prob_scale}.json", "w") as f:
+    with open(f"results/logs/snn_gradient_results_prob{spike_prob_scale}_{num_steps}steps.json", "w") as f:
         json.dump(results, f)
 
     return model

@@ -26,6 +26,7 @@ __pycache__/
 # -----------------------------
 data/raw/
 data/processed/
+data/NMNIST
 
 # -----------------------------
 # Results (large outputs)

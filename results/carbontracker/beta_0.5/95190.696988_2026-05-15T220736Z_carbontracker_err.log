@@ -1,0 +1,12 @@
+2026-05-15 22:07:36,742 - MainThread - WARNING - No API keys provided. Skipping intensity provider initialization.
+2026-05-15 22:07:36,909 - MainThread - WARNING - No carbon intensity provider specified. Using average carbon intensity for ES: 146.15 gCO2eq/kWh.
+2026-05-15 22:20:55,293 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 22:20:55,295 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 22:34:56,692 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 22:34:56,693 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 22:49:17,920 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 22:49:17,922 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 23:04:12,233 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 23:04:12,235 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 23:18:31,612 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.
+2026-05-15 23:18:31,613 - MainThread - WARNING - Epoch duration is too short for a measurement to be collected.

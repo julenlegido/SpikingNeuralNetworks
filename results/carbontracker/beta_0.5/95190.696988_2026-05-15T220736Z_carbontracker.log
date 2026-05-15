@@ -1,0 +1,26 @@
+2026-05-15 22:07:36 - carbontracker version 2.4.4
+2026-05-15 22:07:36 - Only predicted and actual consumptions are multiplied by a PUE coefficient of 1.58 (Daniel Bizo, 2023, Uptime Institute Global Data Center Survey).
+2026-05-15 22:07:36 - The following components were found: GPU with device(s) GPU, ANE. CPU with device(s) CPU.
+2026-05-15 22:07:36 - Monitoring thread started.
+2026-05-15 22:20:55 - Epoch 1:
+2026-05-15 22:20:55 - Duration: 0:13:18.37
+2026-05-15 22:20:55 - Average power usage (W) for gpu: None
+2026-05-15 22:20:55 - Average power usage (W) for cpu: None
+2026-05-15 22:34:56 - Epoch 2:
+2026-05-15 22:34:56 - Duration: 0:13:09.96
+2026-05-15 22:34:56 - Average power usage (W) for gpu: None
+2026-05-15 22:34:56 - Average power usage (W) for cpu: None
+2026-05-15 22:49:17 - Epoch 3:
+2026-05-15 22:49:17 - Duration: 0:13:24.85
+2026-05-15 22:49:17 - Average power usage (W) for gpu: None
+2026-05-15 22:49:17 - Average power usage (W) for cpu: None
+2026-05-15 23:04:12 - Epoch 4:
+2026-05-15 23:04:12 - Duration: 0:13:59.88
+2026-05-15 23:04:12 - Average power usage (W) for gpu: None
+2026-05-15 23:04:12 - Average power usage (W) for cpu: None
+2026-05-15 23:18:31 - Epoch 5:
+2026-05-15 23:18:31 - Duration: 0:13:23.43
+2026-05-15 23:18:31 - Average power usage (W) for gpu: None
+2026-05-15 23:18:31 - Average power usage (W) for cpu: None
+2026-05-15 23:18:31 - Carbon intensities (gCO2eq/kWh) fetched every 900 s at detected location Barcelona, Catalonia, ES: [146.15356]
+2026-05-15 23:18:31 - Monitoring thread ended.

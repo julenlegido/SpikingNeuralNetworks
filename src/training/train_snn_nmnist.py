@@ -7,13 +7,14 @@ import time
 import json
 
 from src.data.nmnist import get_nmnist_dataloaders
-from src.models.snn_cnn_nmnist import SNN_CNN
+from src.models.snn_nmnist import SNN_NMNIST
 from src.utils.device import get_device
+from carbontracker.tracker import CarbonTracker
 
 
 def train_snn_nmnist(
     num_epochs=5,
-    num_steps=15,
+    num_steps=25,
     batch_size=64,
     lr=1e-3,
     beta=0.9
@@ -26,7 +27,7 @@ def train_snn_nmnist(
         num_steps=num_steps
     )
 
-    model = SNN_CNN(beta=beta).to(device)
+    model = SNN_NMNIST(beta=beta).to(device)
 
     criterion = nn.MSELoss()
 
@@ -35,11 +36,19 @@ def train_snn_nmnist(
         lr=lr
     )
 
+    # CarbonTracker
+    tracker = CarbonTracker(
+        epochs=num_epochs,
+        log_dir="results/carbontracker/nmnist"
+    )
+
     train_losses = []
     test_accuracies = []
     epoch_times = []
 
     for epoch in range(num_epochs):
+
+        tracker.epoch_start()
 
         model.train()
 
@@ -52,7 +61,11 @@ def train_snn_nmnist(
             desc=f"Epoch {epoch+1}"
         ):
 
-            frames = frames.float().to(device)
+            frames = (frames > 0).float()
+
+            frames = frames.to(device)
+
+
             labels = labels.to(device)
 
             # [B,T,C,H,W] -> [T,B,C,H,W]
@@ -88,6 +101,8 @@ def train_snn_nmnist(
 
         end_time = time.time()
 
+        tracker.epoch_end()
+
         train_losses.append(total_loss)
 
         epoch_times.append(end_time - start_time)
@@ -105,20 +120,23 @@ def train_snn_nmnist(
 
         print(f"Test Accuracy: {test_accuracy:.2f}%")
 
+    tracker.stop()
+
     torch.save(
         model.state_dict(),
-        "results/checkpoints/snn_nmnist_T15.pth"
+        "results/checkpoints/snn_nmnist_T25.pth"
     )
 
     results = {
         "loss": train_losses,
         "accuracy": test_accuracies,
         "time": epoch_times,
-        "num_steps": num_steps
+        "num_steps": num_steps,
+        "beta": beta
     }
 
     with open(
-        "results/logs/snn_nmnist_results_T15.json",
+        "results/logs/snn_nmnist_results_T25.json",
         "w"
     ) as f:
 
@@ -143,7 +161,10 @@ def evaluate_snn_nmnist(
 
         for frames, labels in data_loader:
 
-            frames = frames.float().to(device)
+            frames = (frames > 0).float()
+
+            frames = frames.to(device)
+
             labels = labels.to(device)
 
             frames = frames.permute(1,0,2,3,4)

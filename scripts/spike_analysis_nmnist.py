@@ -10,7 +10,7 @@ from src.utils.device import get_device
 
 def spike_analysis(
     model_path,
-    num_steps=25,
+    num_steps=5,
     beta=0.9
 ):
 
@@ -66,7 +66,7 @@ def spike_analysis(
         print(f"{k}: {v}")
 
     with open(
-        "results/logs/spike_analysis_nmnist_T25.json",
+        "results/logs/spike_analysis_nmnist_T5.json",
         "w"
     ) as f:
 
@@ -76,7 +76,7 @@ def spike_analysis(
 if __name__ == "__main__":
 
     spike_analysis(
-        model_path="results/checkpoints/snn_nmnist_T25.pth",
-        num_steps=15,
+        model_path="results/checkpoints/snn_nmnist_T5.pth",
+        num_steps=5,
         beta=0.9
     )

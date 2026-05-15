@@ -27,6 +27,7 @@ __pycache__/
 data/raw/
 data/processed/
 data/NMNIST
+data/CIFAR10DVS
 
 # -----------------------------
 # Results (large outputs)

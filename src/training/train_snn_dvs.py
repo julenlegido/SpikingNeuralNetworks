@@ -7,7 +7,7 @@ import time
 import json
 
 from src.data.cifar10dvs import get_cifar10_dvs_dataloaders
-from src.models.snn_dvs import SNN_DVS_CNN
+from src.models.snn_dvs_improved import SNN_DVS
 from src.utils.device import get_device
 
 
@@ -19,11 +19,11 @@ def normalize_frames(frames):
 
 
 def train_snn_cifar10_dvs(
-    num_epochs=5,
+    num_epochs=30,
     num_steps=10,
-    batch_size=32,
-    lr=1e-3,
-    beta=0.975
+    batch_size=64,
+    lr=1e-4,
+    beta=0.95
 ):
     device = get_device()
 
@@ -32,7 +32,7 @@ def train_snn_cifar10_dvs(
         num_steps=num_steps
     )
 
-    model = SNN_DVS_CNN(beta=beta).to(device)
+    model = SNN_DVS(beta=beta).to(device)
 
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -87,7 +87,7 @@ def train_snn_cifar10_dvs(
 
     torch.save(
         model.state_dict(),
-        f"results/checkpoints/snn_dvs_T{num_steps}_beta{beta}.pth"
+        f"results/checkpoints/snn_dvs_improved_{num_epochs}epochs.pth"
     )
 
     results = {
@@ -99,7 +99,7 @@ def train_snn_cifar10_dvs(
     }
 
     with open(
-        f"results/logs/snn_dvs_T{num_steps}_beta{beta}.json",
+        f"results/logs/snn_dvs_improved_{num_epochs}epochs.json",
         "w"
     ) as f:
         json.dump(results, f)

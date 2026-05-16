@@ -55,6 +55,8 @@ class SNN_DVS(nn.Module):
             512
         )
 
+        self.dropout = nn.Dropout(0.3)
+
         self.lif4 = snn.Leaky(beta=beta)
 
         self.fc2 = nn.Linear(
@@ -131,6 +133,8 @@ class SNN_DVS(nn.Module):
             cur = cur.view(cur.size(0), -1)
 
             cur = self.fc1(cur)
+
+            cur = self.dropout(cur)
 
             spk4, mem4 = self.lif4(cur, mem4)
 

@@ -9,10 +9,10 @@ from src.training.train_snn_dvs import normalize_frames
 
 
 def spike_analysis_cifar10_dvs(
-    model_path="results/checkpoints/snn_dvs_improved_30epochs.pth",
-    num_steps=10,
+    model_path="results/checkpoints/snn_dvs_improved2_5epochs_20steps.pth",
+    num_steps=20,
     beta=0.95,
-    num_epochs=30
+    num_epochs=5
 ):
     device = get_device()
 
@@ -64,7 +64,7 @@ def spike_analysis_cifar10_dvs(
         print(f"{k}: {v}")
 
     with open(
-        f"results/logs/spike_analysis_dvs_improved_{num_epochs}epochs.json",
+        f"results/logs/spike_analysis_dvs_improved2_{num_epochs}epochs_{num_steps}steps.json",
         "w"
     ) as f:
 
@@ -74,8 +74,8 @@ def spike_analysis_cifar10_dvs(
 if __name__ == "__main__":
 
     spike_analysis_cifar10_dvs(
-        model_path="results/checkpoints/snn_dvs_improved_30epochs.pth",
-        num_steps=10,
+        model_path="results/checkpoints/snn_dvs_improved2_5epochs_20steps.pth",
+        num_steps=20,
         beta=0.95,
-        num_epochs=30
+        num_epochs=5
     )

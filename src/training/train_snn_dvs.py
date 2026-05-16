@@ -19,8 +19,8 @@ def normalize_frames(frames):
 
 
 def train_snn_cifar10_dvs(
-    num_epochs=30,
-    num_steps=10,
+    num_epochs=5,
+    num_steps=20,
     batch_size=64,
     lr=1e-4,
     beta=0.95
@@ -35,11 +35,18 @@ def train_snn_cifar10_dvs(
     model = SNN_DVS(beta=beta).to(device)
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=num_epochs
+    )
 
     train_losses = []
     test_accuracies = []
     epoch_times = []
+
+    best_accuracy = 0
 
     for epoch in range(num_epochs):
         model.train()
@@ -85,10 +92,15 @@ def train_snn_cifar10_dvs(
         test_accuracies.append(test_accuracy)
         print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-    torch.save(
-        model.state_dict(),
-        f"results/checkpoints/snn_dvs_improved_{num_epochs}epochs.pth"
-    )
+        if test_accuracy > best_accuracy:
+            best_accuracy = test_accuracy
+
+            torch.save(
+                model.state_dict(),
+                f"results/checkpoints/snn_dvs_improved2_{num_epochs}epochs_{num_steps}steps.pth"
+            )
+
+        scheduler.step()    
 
     results = {
         "loss": train_losses,
@@ -99,7 +111,7 @@ def train_snn_cifar10_dvs(
     }
 
     with open(
-        f"results/logs/snn_dvs_improved_{num_epochs}epochs.json",
+        f"results/logs/snn_dvs_improved2_{num_epochs}epochs_{num_steps}steps.json",
         "w"
     ) as f:
         json.dump(results, f)

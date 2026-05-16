@@ -1,0 +1,17 @@
+2026-05-16 11:58:46 - CarbonTracker: The following components were found: GPU with device(s) GPU, ANE. CPU with device(s) CPU.
+2026-05-16 12:11:22 - CarbonTracker: 
+Predicted consumption for 5 epoch(s):
+	Time:	1:02:58
+	Energy:	0.000000000000 kWh
+	CO2eq:	0.000000000000 g
+	This is equivalent to:
+	0.000000000000 km travelled by car
+2026-05-16 13:07:21 - CarbonTracker: Average carbon intensity during training was 146.15 gCO2eq/kWh. 
+2026-05-16 13:07:21 - CarbonTracker: 
+Actual consumption for 5 epoch(s):
+	Time:	1:05:03
+	Energy:	0.000000000000 kWh
+	CO2eq:	0.000000000000 g
+	This is equivalent to:
+	0.000000000000 km travelled by car
+2026-05-16 13:07:21 - CarbonTracker: Finished monitoring.

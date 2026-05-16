@@ -18,7 +18,7 @@ def train_snn_cifar(
     num_steps=15,
     batch_size=64,
     lr=1e-3,
-    beta=0.5
+    beta=0.95
 ):
 
     device = get_device()
@@ -127,10 +127,6 @@ def train_snn_cifar(
         f"results/checkpoints/snn_MSEKaimingImproved_beta{beta}_T{num_steps}.pth"
     )
 
-    # =========================
-    # SAVE RESULTS
-    # =========================
-
     results = {
         "loss": train_losses,
         "accuracy": test_accuracies,
@@ -191,6 +187,6 @@ def evaluate_snn_cifar(
 if __name__ == "__main__":
 
     train_snn_cifar(
-        beta=0.5,
+        beta=0.95,
         num_steps=15
     )

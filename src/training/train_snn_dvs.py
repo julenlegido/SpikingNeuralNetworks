@@ -20,10 +20,10 @@ def normalize_frames(frames):
 
 def train_snn_cifar10_dvs(
     num_epochs=5,
-    num_steps=5,
+    num_steps=10,
     batch_size=32,
     lr=1e-3,
-    beta=0.9
+    beta=0.975
 ):
     device = get_device()
 
@@ -87,7 +87,7 @@ def train_snn_cifar10_dvs(
 
     torch.save(
         model.state_dict(),
-        f"results/checkpoints/snn_dvs_T{num_steps}.pth"
+        f"results/checkpoints/snn_dvs_T{num_steps}_beta{beta}.pth"
     )
 
     results = {
@@ -99,7 +99,7 @@ def train_snn_cifar10_dvs(
     }
 
     with open(
-        f"results/logs/snn_dvs_T{num_steps}.json",
+        f"results/logs/snn_dvs_T{num_steps}_beta{beta}.json",
         "w"
     ) as f:
         json.dump(results, f)

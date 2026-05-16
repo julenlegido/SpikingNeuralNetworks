@@ -9,9 +9,9 @@ from src.training.train_snn_dvs import normalize_frames
 
 
 def spike_analysis_cifar10_dvs(
-    model_path="results/checkpoints/snn_dvs_T5.pth",
-    num_steps=5,
-    beta=0.9
+    model_path="results/checkpoints/snn_dvs_T10_beta0.975.pth",
+    num_steps=10,
+    beta=0.975
 ):
     device = get_device()
 
@@ -57,7 +57,7 @@ def spike_analysis_cifar10_dvs(
         print(f"{k}: {v}")
 
     with open(
-        f"results/logs/spike_analysis_dvs_T{num_steps}.json",
+        f"results/logs/spike_analysis_dvs_T{num_steps}_beta{beta}.json",
         "w"
     ) as f:
         json.dump(results, f)

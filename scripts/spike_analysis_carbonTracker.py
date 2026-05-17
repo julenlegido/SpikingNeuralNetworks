@@ -12,7 +12,7 @@ from src.utils.device import get_device
 def spike_analysis(
     model_path,
     num_steps=15,
-    beta=0.9,
+    beta=0.3,
     batch_size=64
 ):
 
@@ -78,7 +78,7 @@ def spike_analysis(
 if __name__ == "__main__":
 
     spike_analysis(
-        model_path="results/checkpoints/snn_MSEKaimingImproved_beta0.9_T15.pth",
+        model_path="results/checkpoints/snn_MSEKaimingImproved_beta0.3_T15.pth",
         num_steps=15,
-        beta=0.9
+        beta=0.3
     )

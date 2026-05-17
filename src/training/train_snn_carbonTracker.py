@@ -18,7 +18,7 @@ def train_snn_cifar(
     num_steps=15,
     batch_size=64,
     lr=1e-3,
-    beta=0.95
+    beta=0.3
 ):
 
     device = get_device()
@@ -187,6 +187,6 @@ def evaluate_snn_cifar(
 if __name__ == "__main__":
 
     train_snn_cifar(
-        beta=0.95,
+        beta=0.3,
         num_steps=15
     )

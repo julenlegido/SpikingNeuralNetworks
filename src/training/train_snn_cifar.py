@@ -8,12 +8,12 @@ import json
 from snntorch import spikegen
 
 from src.data.cifar10 import get_cifar10_dataloaders
-from src.models.snn_cnn import SNN_CNN
+from src.models.snn_norm_kaimingv2 import SNN_CNN
 from src.utils.device import get_device
 #from src.utils.cifar_gradient_encoding import gradient_rate_encoding
 
 
-def train_snn_cifar(num_epochs=5, num_steps=5, batch_size=64, lr=1e-3, use_mse=True):
+def train_snn_cifar(num_epochs=5, num_steps=15, batch_size=64, lr=1e-3, use_mse=True):
     device = get_device()
 
     train_loader, test_loader = get_cifar10_dataloaders(batch_size=batch_size)

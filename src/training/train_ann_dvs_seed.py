@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,6 +8,8 @@ import time
 import json
 import random
 import numpy as np
+
+from codecarbon import EmissionsTracker
 
 from src.data.cifar10dvs import get_cifar10_dvs_dataloaders
 from src.models.ann_event_cnn import ANN_Event_CNN
@@ -45,7 +48,7 @@ def collapse_time(frames):
 
 
 def train_ann_dvs(
-    num_epochs=20,
+    num_epochs=5,
     num_steps=10,
     batch_size=64,
     lr=1e-3,
@@ -80,61 +83,72 @@ def train_ann_dvs(
 
     best_accuracy = 0
 
-    for epoch in range(num_epochs):
+    output_dir = "results/codecarbon"
+    os.makedirs(output_dir, exist_ok=True)
 
-        model.train()
+    tracker = EmissionsTracker(output_dir=output_dir)
+    tracker.start()
 
-        total_loss = 0
+    try:
+        for epoch in range(num_epochs):
 
-        start_time = time.time()
+            model.train()
 
-        for frames, labels in tqdm(
-            train_loader,
-            desc=f"Epoch {epoch+1}"
-        ):
+            total_loss = 0
 
-            frames = collapse_time(frames).to(device)
+            start_time = time.time()
 
-            labels = labels.to(device)
+            for frames, labels in tqdm(
+                train_loader,
+                desc=f"Epoch {epoch+1}"
+            ):
 
-            optimizer.zero_grad()
+                frames = collapse_time(frames).to(device)
 
-            outputs = model(frames)
+                labels = labels.to(device)
 
-            loss = criterion(outputs, labels)
+                optimizer.zero_grad()
 
-            loss.backward()
+                outputs = model(frames)
 
-            optimizer.step()
+                loss = criterion(outputs, labels)
 
-            total_loss += loss.item()
+                loss.backward()
 
-        end_time = time.time()
+                optimizer.step()
 
-        epoch_times.append(end_time - start_time)
+                total_loss += loss.item()
 
-        train_losses.append(total_loss)
+            end_time = time.time()
 
-        acc = evaluate_ann_dvs(
-            model,
-            test_loader,
-            device
-        )
+            epoch_times.append(end_time - start_time)
 
-        test_accuracies.append(acc)
+            train_losses.append(total_loss)
 
-        print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
-
-        print(f"Test Accuracy: {acc:.2f}%")
-
-        if acc > best_accuracy:
-
-            best_accuracy = acc
-
-            torch.save(
-                model.state_dict(),
-                f"results/checkpoints/ann_dvs_seed{seed}.pth"
+            acc = evaluate_ann_dvs(
+                model,
+                test_loader,
+                device
             )
+
+            test_accuracies.append(acc)
+
+            print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+
+            print(f"Test Accuracy: {acc:.2f}%")
+
+            if acc > best_accuracy:
+
+                best_accuracy = acc
+
+                torch.save(
+                    model.state_dict(),
+                    f"results/checkpoints/ann_dvs_seed{seed}.pth"
+                )
+
+    finally:
+        emissions_kg = tracker.stop()
+        energy_kwh = tracker._total_energy.kWh if tracker._total_energy else 0.0
 
     results = {
         "loss": train_losses,
@@ -142,7 +156,9 @@ def train_ann_dvs(
         "time": epoch_times,
         "num_steps": num_steps,
         "seed": seed,
-        "best_accuracy": best_accuracy
+        "best_accuracy": best_accuracy,
+        "energy_consumption_kwh": energy_kwh,  
+        "co2_emissions_kg": emissions_kg        
     }
 
     with open(

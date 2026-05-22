@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,6 +8,8 @@ import time
 import json
 import random
 import numpy as np
+
+from codecarbon import EmissionsTracker
 
 from src.data.nmnist import get_nmnist_dataloaders
 from src.models.snn_nmnist import SNN_NMNIST
@@ -26,7 +29,7 @@ def set_seed(seed):
 
 
 def train_snn_nmnist(
-    num_epochs=10,
+    num_epochs=5,
     num_steps=10,
     batch_size=64,
     lr=1e-3,
@@ -57,77 +60,88 @@ def train_snn_nmnist(
 
     best_accuracy = 0
 
-    for epoch in range(num_epochs):
-        model.train()
+    output_dir = "results/codecarbon"
+    os.makedirs(output_dir, exist_ok=True)
 
-        total_loss = 0
+    tracker = EmissionsTracker(output_dir=output_dir)
+    tracker.start()
 
-        start_time = time.time()
+    try:
+        for epoch in range(num_epochs):
+            model.train()
 
-        for frames, labels in tqdm(
-            train_loader,
-            desc=f"Epoch {epoch+1}"
-        ):
-            frames = (frames > 0).float()
-            frames = frames.to(device)
-            labels = labels.to(device)
+            total_loss = 0
 
-            # [B,T,C,H,W] -> [T,B,C,H,W]
-            frames = frames.permute(1, 0, 2, 3, 4)
+            start_time = time.time()
 
-            optimizer.zero_grad()
+            for frames, labels in tqdm(
+                train_loader,
+                desc=f"Epoch {epoch+1}"
+            ):
+                frames = (frames > 0).float()
+                frames = frames.to(device)
+                labels = labels.to(device)
 
-            spk_rec = model(frames)
+                # [B,T,C,H,W] -> [T,B,C,H,W]
+                frames = frames.permute(1, 0, 2, 3, 4)
 
-            spk_sum = spk_rec.sum(dim=0)
+                optimizer.zero_grad()
 
-            targets = torch.zeros(
-                labels.size(0),
-                10
-            ).to(device)
+                spk_rec = model(frames)
 
-            targets.scatter_(
-                1,
-                labels.unsqueeze(1),
-                1.0
+                spk_sum = spk_rec.sum(dim=0)
+
+                targets = torch.zeros(
+                    labels.size(0),
+                    10
+                ).to(device)
+
+                targets.scatter_(
+                    1,
+                    labels.unsqueeze(1),
+                    1.0
+                )
+
+                loss = criterion(
+                    spk_sum / num_steps,
+                    targets
+                )
+
+                loss.backward()
+
+                optimizer.step()
+
+                total_loss += loss.item()
+
+            end_time = time.time()
+
+            train_losses.append(total_loss)
+            epoch_times.append(end_time - start_time)
+
+            print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+
+            test_accuracy = evaluate_snn_nmnist(
+                model,
+                test_loader,
+                device,
+                num_steps
             )
 
-            loss = criterion(
-                spk_sum / num_steps,
-                targets
-            )
+            test_accuracies.append(test_accuracy)
 
-            loss.backward()
+            print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-            optimizer.step()
+            if test_accuracy > best_accuracy:
+                best_accuracy = test_accuracy
 
-            total_loss += loss.item()
+                torch.save(
+                    model.state_dict(),
+                    f"results/checkpoints/snn_nmnist_seed{seed}.pth"
+                )
 
-        end_time = time.time()
-
-        train_losses.append(total_loss)
-        epoch_times.append(end_time - start_time)
-
-        print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
-
-        test_accuracy = evaluate_snn_nmnist(
-            model,
-            test_loader,
-            device,
-            num_steps
-        )
-
-        test_accuracies.append(test_accuracy)
-
-        print(f"Test Accuracy: {test_accuracy:.2f}%")
-
-        if test_accuracy > best_accuracy:
-            best_accuracy = test_accuracy
-
-            torch.save(
-                model.state_dict(),
-                f"results/checkpoints/snn_nmnist_seed{seed}.pth"
-            )
+    finally:
+        emissions_kg = tracker.stop()
+        energy_kwh = tracker._total_energy.kWh if tracker._total_energy else 0.0
 
     results = {
         "loss": train_losses,
@@ -136,7 +150,9 @@ def train_snn_nmnist(
         "num_steps": num_steps,
         "beta": beta,
         "seed": seed,
-        "best_accuracy": best_accuracy
+        "best_accuracy": best_accuracy,
+        "energy_consumption_kwh": energy_kwh,  
+        "co2_emissions_kg": emissions_kg        
     }
 
     with open(

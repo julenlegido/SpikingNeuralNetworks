@@ -4,7 +4,7 @@ import snntorch as snn
 
 
 class SNN_DVS_CNN(nn.Module):
-    def __init__(self, beta=0.9):
+    def __init__(self, beta=0.95):
         super().__init__()
 
         self.conv1 = nn.Conv2d(2, 32, kernel_size=3, padding=1)

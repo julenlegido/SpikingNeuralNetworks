@@ -1,0 +1,1 @@
+{"seeds": [42, 123, 999], "final_accuracies": [61.07, 61.22, 60.95], "best_accuracies": [61.07, 61.22, 60.95], "mean_final_accuracy": 61.080000000000005, "std_final_accuracy": 0.11045361017187101, "mean_best_accuracy": 61.080000000000005, "std_best_accuracy": 0.11045361017187101}

@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,8 +10,11 @@ import json
 import random
 import numpy as np
 
+#import CodeCarbon
+from codecarbon import EmissionsTracker
+
 from src.data.cifar10dvs import get_cifar10_dvs_dataloaders
-from src.models.snn_dvs_improved import SNN_DVS
+from src.models.snn_dvs import SNN_DVS_CNN
 from src.utils.device import get_device
 
 
@@ -41,10 +45,10 @@ def normalize_frames(frames):
 
 
 def train_snn_cifar10_dvs(
-    num_epochs=10,
-    num_steps=20,
-    batch_size=64,
-    lr=1e-4,
+    num_epochs=5,
+    num_steps=10,
+    batch_size=32,
+    lr=1e-3,
     beta=0.95,
     seed=42
 ):
@@ -58,14 +62,14 @@ def train_snn_cifar10_dvs(
         num_steps=num_steps
     )
 
-    model = SNN_DVS(beta=beta).to(device)
+    model = SNN_DVS_CNN(beta=beta).to(device)
 
     criterion = nn.MSELoss()
 
     optimizer = optim.Adam(
         model.parameters(),
         lr=lr,
-        weight_decay=1e-4
+        weight_decay=1e-3
     )
 
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
@@ -79,82 +83,93 @@ def train_snn_cifar10_dvs(
 
     best_accuracy = 0
 
-    for epoch in range(num_epochs):
+    output_dir = "results/codecarbon"
+    os.makedirs(output_dir, exist_ok=True)
 
-        model.train()
+    tracker = EmissionsTracker(output_dir=output_dir)
+    tracker.start()
 
-        total_loss = 0
+    try:
+        for epoch in range(num_epochs):
 
-        start_time = time.time()
+            model.train()
 
-        for frames, labels in tqdm(
-            train_loader,
-            desc=f"Epoch {epoch+1}"
-        ):
+            total_loss = 0
 
-            frames = normalize_frames(frames).to(device)
+            start_time = time.time()
 
-            labels = labels.to(device)
+            for frames, labels in tqdm(
+                train_loader,
+                desc=f"Epoch {epoch+1}"
+            ):
 
-            frames = frames.permute(1, 0, 2, 3, 4)
+                frames = normalize_frames(frames).to(device)
 
-            optimizer.zero_grad()
+                labels = labels.to(device)
 
-            spk_rec = model(frames)
+                frames = frames.permute(1, 0, 2, 3, 4)
 
-            spk_sum = spk_rec.sum(dim=0)
+                optimizer.zero_grad()
 
-            targets = torch.zeros(
-                labels.size(0),
-                10
-            ).to(device)
+                spk_rec = model(frames)
 
-            targets.scatter_(
-                1,
-                labels.unsqueeze(1),
-                1.0
+                spk_sum = spk_rec.sum(dim=0)
+
+                targets = torch.zeros(
+                    labels.size(0),
+                    10
+                ).to(device)
+
+                targets.scatter_(
+                    1,
+                    labels.unsqueeze(1),
+                    1.0
+                )
+
+                loss = criterion(
+                    spk_sum / num_steps,
+                    targets
+                )
+
+                loss.backward()
+
+                optimizer.step()
+
+                total_loss += loss.item()
+
+            end_time = time.time()
+
+            train_losses.append(total_loss)
+
+            epoch_times.append(end_time - start_time)
+
+            print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+
+            test_accuracy = evaluate_snn_cifar10_dvs(
+                model=model,
+                data_loader=test_loader,
+                device=device,
+                num_steps=num_steps
             )
 
-            loss = criterion(
-                spk_sum / num_steps,
-                targets
-            )
+            test_accuracies.append(test_accuracy)
 
-            loss.backward()
+            print(f"Test Accuracy: {test_accuracy:.2f}%")
 
-            optimizer.step()
+            if test_accuracy > best_accuracy:
 
-            total_loss += loss.item()
+                best_accuracy = test_accuracy
 
-        end_time = time.time()
+                torch.save(
+                    model.state_dict(),
+                    f"results/checkpoints/snn_dvs_seed{seed}_{num_epochs}epochs.pth"
+                )
 
-        train_losses.append(total_loss)
+            scheduler.step()
 
-        epoch_times.append(end_time - start_time)
-
-        print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
-
-        test_accuracy = evaluate_snn_cifar10_dvs(
-            model=model,
-            data_loader=test_loader,
-            device=device,
-            num_steps=num_steps
-        )
-
-        test_accuracies.append(test_accuracy)
-
-        print(f"Test Accuracy: {test_accuracy:.2f}%")
-
-        if test_accuracy > best_accuracy:
-
-            best_accuracy = test_accuracy
-
-            torch.save(
-                model.state_dict(),
-                f"results/checkpoints/snn_dvs_seed{seed}.pth"
-            )
-
-        scheduler.step()
+    finally:
+        emissions_kg = tracker.stop()
+        energy_kwh = tracker._total_energy.kWh if tracker._total_energy else 0.0
 
     results = {
         "loss": train_losses,
@@ -162,11 +177,13 @@ def train_snn_cifar10_dvs(
         "time": epoch_times,
         "num_steps": num_steps,
         "beta": beta,
-        "seed": seed
+        "seed": seed,
+        "energy_consumption_kwh": energy_kwh,
+        "co2_emissions_kg": emissions_kg
     }
 
     with open(
-        f"results/logs/snn_dvs_seed{seed}.json",
+        f"results/logs/snn_dvs_seed{seed}_{num_epochs}epochs.json",
         "w"
     ) as f:
 
@@ -227,7 +244,7 @@ if __name__ == "__main__":
         )
 
         with open(
-            f"results/logs/snn_dvs_seed{seed}.json"
+            f"results/logs/snn_dvs_seed{seed}_5epochs.json"
         ) as f:
 
             data = json.load(f)

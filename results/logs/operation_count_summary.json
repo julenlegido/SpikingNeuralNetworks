@@ -1,0 +1,32 @@
+[
+    {
+        "label": "Static CIFAR10 SNN",
+        "ann_macs": 10000000,
+        "snn_time_steps": 15,
+        "snn_firing_rate": 0.09807466666666667,
+        "estimated_active_snn_sops": 14711200.0,
+        "energy_reduction": 2.3413755808122003,
+        "mac_energy": 3.1,
+        "sop_energy": 0.9
+    },
+    {
+        "label": "N-MNIST SNN",
+        "ann_macs": 2000000,
+        "snn_time_steps": 10,
+        "snn_firing_rate": 0.100397,
+        "estimated_active_snn_sops": 2007940.0,
+        "energy_reduction": 3.4308240728751302,
+        "mac_energy": 3.1,
+        "sop_energy": 0.9
+    },
+    {
+        "label": "CIFAR10-DVS SNN",
+        "ann_macs": 10000000,
+        "snn_time_steps": 10,
+        "snn_firing_rate": 0.09096,
+        "estimated_active_snn_sops": 9096000.0,
+        "energy_reduction": 3.7867682986416495,
+        "mac_energy": 3.1,
+        "sop_energy": 0.9
+    }
+]

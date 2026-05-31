@@ -1,0 +1,29 @@
+{
+    "scale": 0.7,
+    "per_seed_results": [
+        {
+            "seed": 42,
+            "total_spikes": 1353092.0,
+            "firing_rate": 0.09020613333333333,
+            "sparsity": 0.9097938666666667
+        },
+        {
+            "seed": 123,
+            "total_spikes": 1413048.0,
+            "firing_rate": 0.0942032,
+            "sparsity": 0.9057968
+        },
+        {
+            "seed": 999,
+            "total_spikes": 1738800.0,
+            "firing_rate": 0.11592,
+            "sparsity": 0.88408
+        }
+    ],
+    "mean_firing_rate": 0.10010977777777778,
+    "std_firing_rate": 0.011297978595645077,
+    "mean_sparsity": 0.8998902222222221,
+    "std_sparsity": 0.011297978595645098,
+    "mean_total_spikes": 1501646.6666666667,
+    "std_total_spikes": 169469.67893467617
+}
